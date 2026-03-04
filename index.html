@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Homes — Job Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1425;
+    --navy-light: #131d33;
+    --navy-mid: #1a2744;
+    --navy-card: #162038;
+    --gold: #c9a84c;
+    --gold-light: #dfc06a;
+    --gold-dark: #a8893a;
+    --gold-faint: rgba(201, 168, 76, 0.12);
+    --text-primary: #f0f0f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: rgba(201, 168, 76, 0.15);
+    --card-border: rgba(255,255,255,0.06);
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.1);
+    --green: #22c55e;
+    --green-bg: rgba(34, 197, 94, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, var(--navy) 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 40px 0 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .header h1 span {
+    color: var(--text-primary);
+    font-weight: 400;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    display: block;
+    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .header-date {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .header-date strong {
+    color: var(--gold);
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 2px;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--navy-card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+  }
+  .stat-card.gold::before { background: var(--gold); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.muted::before { background: var(--text-muted); }
+  .stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+  }
+  .stat-card.gold .stat-value { color: var(--gold); }
+  .stat-card.green .stat-value { color: var(--green); }
+  .stat-card.red .stat-value { color: var(--red); }
+  .stat-card.muted .stat-value { color: var(--text-secondary); }
+
+  /* Controls panel */
+  .controls {
+    background: var(--navy-card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  /* View buttons */
+  .view-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .view-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--card-border);
+    background: var(--navy-mid);
+    color: var(--text-secondary);
+  }
+  .view-btn:hover { border-color: var(--gold-dark); color: var(--text-primary); }
+  .view-btn.active {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--navy);
+    border-color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* Filters */
+  .filters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 768px) { .filters { grid-template-columns: 1fr; } }
+  .filter-group { position: relative; }
+  .filter-group svg {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 18px; height: 18px;
+    color: var(--text-muted);
+  }
+  .filter-input, .filter-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--navy);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .filter-input:focus, .filter-select:focus { border-color: var(--gold); }
+  .filter-input { padding-left: 42px; }
+  .filter-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+  }
+  .filter-select option { background: var(--navy-light); color: var(--text-primary); }
+
+  /* Day groups */
+  .day-group { margin-bottom: 36px; }
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .day-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .day-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .today-badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* Task cards */
+  .task-card {
+    background: var(--navy-card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    border-left: 4px solid var(--navy-mid);
+  }
+  .task-card:hover {
+    border-color: rgba(201, 168, 76, 0.25);
+    border-left-color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .task-card.overdue {
+    border-left-color: var(--red);
+    background: rgba(239, 68, 68, 0.04);
+  }
+  .task-card.overdue:hover { border-left-color: var(--red); }
+  .task-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .task-info { flex: 1; min-width: 220px; }
+  .task-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .task-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .job-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid;
+    white-space: nowrap;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+  .vendor-tag {
+    font-size: 0.72rem;
+    color: var(--gold-light);
+    background: var(--gold-faint);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .task-dates {
+    display: flex;
+    gap: 20px;
+    text-align: center;
+  }
+  .date-block { }
+  .date-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .date-value { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); }
+  .date-value.overdue-text { color: var(--red); }
+
+  /* Completion badge */
+  .completion {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .comp-high { background: var(--green-bg); color: var(--green); }
+  .comp-mid { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+  .comp-low { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+  .comp-zero { background: rgba(239, 68, 68, 0.12); color: #f87171; }
+
+  .overdue-flag {
+    background: var(--red);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .empty-state {
+    background: var(--navy-card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 60px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  /* Legend */
+  .legend {
+    background: var(--navy-card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .legend h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 1024px) { .legend-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { .legend-grid { grid-template-columns: repeat(2, 1fr); } }
+  .legend-btn {
+    text-align: left;
+    font-size: 0.78rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.7;
+    font-family: 'Inter', sans-serif;
+  }
+  .legend-btn:hover { opacity: 1; }
+
+  /* Setup Banner */
+  .setup-banner {
+    background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .setup-banner-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .setup-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .setup-input {
+    flex: 1;
+    min-width: 240px;
+    padding: 8px 12px;
+    background: var(--navy);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: 'Inter', monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .setup-input:focus {
+    border-color: var(--gold);
+  }
+  .setup-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .status-dot.connected {
+    background: var(--green);
+  }
+  .status-dot.error {
+    background: var(--red);
+  }
+  .status-text {
+    color: var(--text-secondary);
+  }
+
+  /* Edit Panel */
+  .edit-panel {
+    background: var(--navy-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 24px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+    max-width: 600px;
+    display: none;
+  }
+  .edit-panel.open {
+    display: block;
+  }
+  .edit-panel-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .edit-panel-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+  .completion-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--navy-mid);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .completion-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .completion-slider::-webkit-slider-thumb:hover {
+    background: var(--gold-light);
+  }
+  .completion-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+  }
+  .completion-slider::-moz-range-thumb:hover {
+    background: var(--gold-light);
+  }
+  .completion-display {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    background: var(--navy);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .notes-textarea:focus {
+    border-color: var(--gold);
+  }
+  .edit-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .btn-save, .btn-cancel {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-save {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--navy);
+    border: 1px solid var(--gold);
+  }
+  .btn-save:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  }
+  .btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .btn-cancel {
+    background: var(--navy-mid);
+    color: var(--text-secondary);
+    border: 1px solid var(--card-border);
+  }
+  .btn-cancel:hover {
+    background: var(--navy);
+    color: var(--text-primary);
+    border-color: var(--gold-dark);
+  }
+  .save-status {
+    font-size: 0.8rem;
+    margin-top: 12px;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .save-status.saving {
+    color: var(--text-secondary);
+  }
+  .save-status.success {
+    color: var(--green);
+  }
+  .save-status.error {
+    color: var(--red);
+  }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .checkmark {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+  }
+  .task-card.clickable {
+    cursor: pointer;
+  }
+  .task-card.clickable:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Setup Banner -->
+<div class="setup-banner">
+  <div class="setup-banner-inner">
+    <span class="setup-label">Apps Script URL:</span>
+    <input id="script-url-input" type="text" class="setup-input" placeholder="Paste your Apps Script Web App deployment URL here...">
+    <div class="setup-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">Not configured</span>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <h1>LAUNCH HOMES<span>Construction Job Dashboard</span></h1>
+    <div class="header-date">
+      <strong id="today-display"></strong>
+      <span>Live Schedule Overview</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card gold">
+      <p class="stat-label">Tasks In View</p>
+      <p class="stat-value" id="stat-tasks">0</p>
+    </div>
+    <div class="stat-card green">
+      <p class="stat-label">Active Jobs</p>
+      <p class="stat-value" id="stat-jobs">0</p>
+    </div>
+    <div class="stat-card red">
+      <p class="stat-label">Overdue</p>
+      <p class="stat-value" id="stat-overdue">0</p>
+    </div>
+    <div class="stat-card muted">
+      <p class="stat-label">Total Tasks</p>
+      <p class="stat-value" id="stat-total">0</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="view-btns" id="view-btns">
+      <button class="view-btn" data-view="today">Today</button>
+      <button class="view-btn active" data-view="thisWeek">This Week</button>
+      <button class="view-btn" data-view="nextWeek">Next Week</button>
+      <button class="view-btn" data-view="allUpcoming">All Upcoming</button>
+    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search-input" type="text" class="filter-input" placeholder="Search task, job, vendor...">
+      </div>
+      <div class="filter-group">
+        <select id="job-filter" class="filter-select"><option value="">All Jobs</option></select>
+      </div>
+      <div class="filter-group">
+        <select id="vendor-filter" class="filter-select"><option value="">All Vendors</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Panel -->
+  <div id="edit-panel" class="edit-panel">
+    <div class="edit-panel-title" id="edit-panel-title">Edit Task</div>
+    <div class="edit-panel-content">
+      <div class="form-group">
+        <label class="form-label">Completion %</label>
+        <input type="range" id="completion-slider" class="completion-slider" min="0" max="100" step="10" value="0">
+        <div class="completion-display" id="completion-display">0%</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea id="notes-textarea" class="notes-textarea" placeholder="Add notes about this task..."></textarea>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-save" id="btn-save">Save to Sheet</button>
+        <button class="btn-cancel" id="btn-cancel">Cancel</button>
+      </div>
+      <div class="save-status" id="save-status"></div>
+    </div>
+  </div>
+
+  <!-- Tasks -->
+  <div id="task-list"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <h3>Job Legend</h3>
+    <div id="job-legend" class="legend-grid"></div>
+  </div>
+</div>
+
+<script>
+// Sheet name mapping for Apps Script
+var SHEET_MAP = {
+  0: 'SCOBY RES',
+  1: 'SPEC HOME 36 NEWBURY',
+  2: '103 Newbury Circle Basement Schedule',
+  3: 'BUDNEY RES',
+  4: 'WOLBECK RES',
+  5: 'CARREIRO RES',
+  6: 'NOYEN RES',
+  7: 'HRYTSAK RES',
+  8: 'STACH RES',
+  9: 'LOW RES',
+  10: 'ADAM RES',
+  11: '95 Newbury Circle',
+  12: '97 & 99 Newbury Circle',
+  13: 'HANCOCK RES',
+  14: 'Mouille Res',
+  15: 'SHOWHOME 1 HARVEST',
+  16: 'CHAUNDY RES',
+  17: 'PATEL RES',
+  18: 'TEWS RES',
+  19: 'HELBOE RES',
+  20: 'MCPHERSON RES',
+  21: 'McNabb Res',
+  22: 'DUIKER RES',
+  23: 'BAHRAMI RES'
+};
+
+var JOBS = [
+  'SCOBY RES. 226 RANCHER ROAD','SPEC HOME. 36 NEWBURY CIRCLE','103 Newbury Circle Basement Schedule',
+  'BUDNEY RES. 77 HARVEST CRESCENT','WOLBECK RES, 533033 RR180','CARREIRO RES. 56 NEWBURY CIRCLE',
+  'NOYEN RES. 54142 HWY 21, SH.PARK','HRYTSAK RES. 24 NEWBURY CIRCLE','STACH RES. 552957 RR203',
+  'LOW RES. 550037 RR204, LAMONT COUNTY','ADAM RES. 85 HARVEST CRESCENT','95 Newbury Circle.',
+  '97 (LOT63) & 99 (LOT62) Newbury Circle','HANCOCK RES. 65, 52059 RR220, HALF MOOK LAKE',
+  'Mouille Res 51280 RR225','SHOWHOME, 1 HARVEST CRESCENT','CHAUNDY RES. 86 HARVEST CRESCENT',
+  'PATEL RES. 100, 49320 RR240A, LEDUC COUNTY','TEWS RES. 50, 52331 RR225',
+  'HELBOE RES. 642, 52327 RR233 SH.PARK','MCPHERSON RES. 430 50054 RR232, Leduc County',
+  'McNabb Res 75 Harvest Cres','DUIKER RES. 73 HARVEST CRESCENT','BAHRAMI RES. 25, 52249 RR233 SH.PARK'
+];
+
+var JOB_COLORS = [
+  {bg:'#1e3a5f',text:'#7cb3f0',border:'#2e5a8f'},{bg:'#1a3d2e',text:'#6fcf97',border:'#2a6d4e'},
+  {bg:'#2d1f4e',text:'#b794f4',border:'#4a3578'},{bg:'#3d1f2e',text:'#f4a5c4',border:'#6d2a4e'},
+  {bg:'#1f2a4e',text:'#94a8f4',border:'#354a78'},{bg:'#3d1f1f',text:'#f4a5a5',border:'#6d2a2a'},
+  {bg:'#3d3a1a',text:'#e8d44d',border:'#6d652a'},{bg:'#1a3d25',text:'#6fcf7f',border:'#2a6d3e'},
+  {bg:'#1a2f4e',text:'#6fb3f0',border:'#2a4f7e'},{bg:'#2a1f4e',text:'#a594f4',border:'#4a3578'},
+  {bg:'#3d1f2a',text:'#f4a5b4',border:'#6d2a4a'},{bg:'#1f264e',text:'#8494f4',border:'#354078'},
+  {bg:'#3d2020',text:'#f4a8a8',border:'#6d3030'},{bg:'#3d3820',text:'#e8d060',border:'#6d6030'},
+  {bg:'#2a2d30',text:'#a0a8b0',border:'#4a5058'},{bg:'#162840',text:'#5a9ad8',border:'#264068'},
+  {bg:'#163020',text:'#5ab878',border:'#265040'},{bg:'#281838',text:'#9a78c8',border:'#402858'},
+  {bg:'#381828',text:'#c878a8',border:'#582840'},{bg:'#182038',text:'#7888c8',border:'#283858'},
+  {bg:'#381818',text:'#c87878',border:'#582828'},{bg:'#383018',text:'#c8b858',border:'#585028'},
+  {bg:'#282a2e',text:'#98a0a8',border:'#484e58'},{bg:'#1a3050',text:'#6aa0d8',border:'#2a5080'}
+];
+
+var TASKS_RAW = "0~VIRTUAL TOUR AND PHOTOS~LAUNCH~3/5/26~~0%\n0~POSSESSION @ 2PM~LAUNCH~3/6/26~~0%\n1~Tub and Window Polish~Craft D~2/23/26~~0%\n1~PAINT FINAL Alison Touch Ups~Alison~2/23/26~~0%\n1~Final Paint~DAYVIEW~2/23/26~2/26/26~0%\n1~Final Clean~~2/27/26~~0%\n1~VIRTUAL TOUR AND PHOTOS~LAUNCH~3/6/26~~0%\n1~POSSESSION @ 2PM~LAUNCH~3/7/26~~0%\n2~CLOSET INSTALL, mirror and closet~Yeg~2/23/26~~0%\n2~Final Paint~DAYVIEW~2/24/26~2/25/26~0%\n2~Final Clean basement and full house~NYOS~2/27/26~~0%\n2~Basement Bedroom Blind Install~~3/2/26~~0%\n2~POSSESSION @ 2PM~LAUNCH~3/5/26~~0%\n3~client supplied blinds~~2/23/26~2/25/26~90%\n3~VIRTUAL TOUR AND PHOTOS~LAUNCH~2/27/26~2/27/26~0%\n3~POSSESSION @ 2PM~LAUNCH~3/2/26~3/2/26~0%\n5~HVAC FINAL~Payne Free~2/23/26~~0%\n5~CABINET FINALS~RODINA~2/24/26~2/27/26~0%\n5~Appliance pre inspections~Vantec~2/27/26~2/27/26~\n5~FURNACE CLEAN~Payne Free~2/27/26~~0%\n5~PRE CARPET CLEAN~NYOS~2/28/26~~0%\n5~FIREPLACE FINAL~GEMCO~3/2/26~~0%\n5~CARPET INSTALL If Applicable~WORLD~3/2/26~3/5/26~0%\n5~CLOSET INSTALL, Glass, Mirror~Yeg~3/5/26~3/9/26~0%\n5~Deep Clean~NYOS~3/10/26~~0%\n5~WINDOW LOCKOUT~AWW~3/10/26~~0%\n5~Tub and Window Polish~Craft D~3/11/26~~0%\n5~APPLIANCE DELIVERY~TRAIL APPLIANCES~3/12/26~~0%\n5~APPLIANCE INSTALL~TRAIL APPLIANCES~3/13/26~~0%\n5~PAINT FINAL Alison Touch Ups~Alison~3/19/26~~0%\n5~Final Paint~DAYVIEW~3/19/26~3/26/26~0%\n6~SHOWER GLASS TEMPLATE~Yeg~2/23/26~~0%\n6~VINYL PLANK INSTALL~WORLD~2/23/26~3/5/26~0%\n6~RAILING~JOHNNY5~3/5/26~3/12/26~0%\n6~COUNTERTOP INSTALL~URBAN GRANITE~3/5/26~~0%\n6~STAGE 2 FINISHING DELIVERY~IGLOO- NICOLE~3/5/26~~0%\n6~STAGE 2 FINISHING INSTALL~ELEGANCE~3/6/26~3/10/26~0%\n6~BACKSPLASH~WORLD~3/6/26~3/9/26~0%\n6~Mirror Templating~Yeg~3/12/26~~0%\n6~PLUMBING FINAL~WAYSIDE~3/10/26~3/11/26~0%\n6~ELECTRICAL FIXTURE DELIVERY~Park~3/11/26~~0%\n6~CABINET FINALS~RODINA~3/12/26~3/13/26~0%\n6~ELECTRICAL FINAL~RKAY~3/12/26~3/19/26~0%\n6~HVAC FINAL~Payne Free~3/20/26~~0%\n7~Mirror Templating~Yeg~2/25/26~~0%\n7~PLUMBING FINAL~WAYSIDE~2/25/26~2/26/26~0%\n7~ELECTRICAL FIXTURE DELIVERY~Park~2/27/26~~0%\n7~ELECTRICAL FINAL~RKAY~3/2/26~3/10/26~0%\n7~HVAC FINAL~Payne Free~3/11/26~~0%\n7~CABINET FINALS~RODINA~3/12/26~3/19/26~0%\n7~FIREPLACE FINAL~GEMCO~3/19/26~~0%\n7~FURNACE CLEAN~Payne Free~3/19/26~~0%\n8~FURNACE CLEAN~Payne Free~3/2/26~~0%\n8~PRE CARPET CLEAN~NYOS~3/3/26~~0%\n8~CARPET INSTALL If Applicable~WORLD~3/4/26~3/9/26~0%\n8~CLOSET INSTALL, Glass, Mirror~Yeg~3/9/26~3/13/26~0%\n8~Deep Clean~NYOS~3/14/26~~0%\n8~Tub install~wayside~3/16/26~3/16/26~\n8~APPLIANCE DELIVERY~TRAIL APPLIANCES~3/17/26~~0%\n8~APPLIANCE INSTALL~TRAIL APPLIANCES~3/19/26~3/19/26~0%\n8~WINDOW LOCKOUT~AWW~3/18/26~~0%\n8~Tub and Window Polish~Craft D~3/18/26~~0%\n8~Final Paint~DAYVIEW~3/19/26~3/25/26~0%\n9~HVAC FINAL~Payne Free~2/27/26~~0%\n9~appliance pre inspection~Vantec~3/2/26~3/2/26~\n9~CABINET FINALS~RODINA~3/2/26~3/6/26~0%\n9~FIREPLACE FINAL~GEMCO~3/6/26~~0%\n9~FURNACE CLEAN~Payne Free~3/6/26~~0%\n9~Deep Clean~NYOS~3/7/26~~0%\n9~WINDOW LOCKOUT~AWW~3/9/26~~0%\n9~CLOSET INSTALL, Glass, Mirror~yeg~3/10/26~3/13/26~0%\n9~Window and Tub Polish~Craft D~3/13/26~~\n9~APPLIANCE DELIVERY~TRAIL APPLIANCES~3/17/26~~0%\n9~APPLIANCE INSTALL~TRAIL APPLIANCES~3/18/26~3/18/26~0%\n9~PAINT FINAL Alison Touch Ups~Alison~3/19/26~~0%\n9~Final Paint~DAYVIEW~3/19/26~3/26/26~0%\n10~PLUMBING FINAL~WAYSIDE~3/9/26~3/11/26~0%\n10~basement patio door repair~AWW~3/11/26~3/11/26~\n10~ELECTRICAL FIXTURE DELIVERY~Park~3/11/26~~0%\n10~ELECTRICAL FINAL~RKAY~3/12/26~3/19/26~0%\n10~HVAC FINAL~Payne Free~3/20/26~~0%\n11~CABINET DELIVERY~RODINA~2/25/26~~0%\n11~CABINET INSTALL start with bathrooms~RODINA~2/26/26~3/6/26~0%\n11~TILE DELIVERY~WORLD~3/6/26~~0%\n11~TILE INSTALL~WORLD~3/9/26~3/16/26~0%\n11~COUNTERTOP TEMPLATE.~URBAN GRANITE~3/11/26~~0%\n11~SHOWER GLASS TEMPLATE~Yeg~3/17/26~~0%\n11~VINYL DELIVERY~WORLD~3/16/26~~0%\n11~VINYL PLANK INSTALL~WORLD~3/17/26~3/19/26~0%\n11~COUNTERTOP INSTALL~URBAN GRANITE~3/20/26~~0%\n11~STAGE 2 FINISHING DELIVERY~IGLOO- NICOLE~3/20/26~~0%\n11~WALKTHROUGH~LAUNCH Dylan and Joni~3/20/26~~0%\n12~BACKSPLASH~WORLD~2/25/26~3/2/26~0%\n12~Mirror Templating, Office Templating, Gym Templating~Yeg~3/3/26~~0%\n12~PLUMBING FINAL~WAYSIDE~3/4/26~3/9/26~0%\n12~ELECTRICAL FIXTURE DELIVERY~Park~3/9/26~~0%\n12~ELECTRICAL FINAL~RKAY~3/10/26~3/19/26~0%\n12~HVAC FINAL~Payne Free~3/20/26~~0%\n13~Concrete floor painting~Dayview~3/11/26~3/11/26~\n13~COUNTERTOP INSTALL~URBAN GRANITE~3/11/26~~0%\n13~STAGE 2 FINISHING DELIVERY~IGLOO- NICOLE~3/12/26~~0%\n13~Gym floor install~Client~3/12/26~3/12/26~\n13~STAGE 2 FINISHING INSTALL~ELEGANCE~3/13/26~3/17/26~0%\n13~BACKSPLASH~WORLD~3/18/26~3/20/26~0%\n14~bring spray foam back to complete rimboard~Urban~2/25/26~~\n14~finish boiler~wayside~2/26/26~2/27/26~\n15~CABINET DELIVERY~RODINA~2/27/26~~0%\n15~CABINET INSTALL~RODINA~3/2/26~3/13/26~0%\n15~SHOWER GLASS TEMPLATE~Yeg~3/12/26~~0%\n15~VINYL DELIVERY~WORLD~3/12/26~~0%\n15~VINYL PLANK INSTALL~WORLD~3/13/26~3/23/26~0%\n15~COUNTERTOP TEMPLATE~URBAN GRANITE~3/13/26~~0%\n18~TILE INSTALL~WORLD~2/26/26~3/6/26~10\n18~COUNTERTOP TEMPLATE. we will need to install the fireplace hearth before vinyl is done in the great room~URBAN GRANITE~3/3/26~~0%\n18~VINYL DELIVERY~WORLD~3/6/26~~0%\n18~SHOWER GLASS TEMPLATE~Yeg~3/11/26~~0%\n18~VINYL PLANK INSTALL~WORLD~3/9/26~3/17/26~0%\n18~COUNTERTOP INSTALL~URBAN GRANITE~3/18/26~~0%\n18~STAGE 2 FINISHING DELIVERY~IGLOO- NICOLE~3/18/26~~0%\n18~WALKTHROUGH~LAUNCH Dylan and Joni~3/18/26~~0%\n18~STAGE 2 FINISHING INSTALL~ELEGANCE~3/19/26~3/22/26~0%\n21~HVAC MEASURE~FLATLAND~2/26/26~~0%\n21~sump pail and weeping tile trenching~Lenbeth~2/25/26~~\n21~PLUMBING GROUNDWORK~WAYSIDE~2/27/26~~0%\n21~GROUNDWORK INSPECTION~WAYSIDE~3/2/26~~0%\n21~FLOOR PREP~NORTHSTAR~3/6/26~~0%\n21~CONCRETE FLOOR POUR~NORTHSTAR~3/9/26~~0%\n21~Basement Packages Jason Make sure u guys accounted for the studs in the sunken area~Igloo~3/12/26~~0%\n21~Frost Wall Install~Ben~3/13/26~3/16/26~0%\n21~Spray Foam Rim Joist / Ipd For Basement~Urban Pro~3/18/26~~0%\n21~Duct Install zoned basement main and second one zone~Payne Free~3/19/26~3/23/26~0%\n21~CABINET MARKOUTS~RODINA~2/27/26~~0%\n21~PLUMBING STACKS & GASLINE~WAYSIDE~3/2/26~3/4/26~0%\n21~SHINGLE LOAD~GCE~3/4/26~~0%\n21~HVAC ROUGH-IN~FLATLAND~3/5/26~~0%\n22~Precast swap out~Carrier~~3/13/26~";
+
+// Parse
+function parseDate(s){var p=s.split('/');return new Date(2000+parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));}
+function fmtDate(d){return d?(d.getMonth()+1)+'/'+d.getDate():'';}
+var WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+var allTasks=TASKS_RAW.trim().split('\n').map(function(line,i){
+  var p=line.split('~');var ji=parseInt(p[0]);
+  return{id:i,jobIndex:ji,jobName:JOBS[ji],taskName:p[1],vendor:p[2]||'Unassigned',
+    startDate:p[3]?parseDate(p[3]):null,dueDate:p[4]?parseDate(p[4]):null,completion:parseInt(p[5])||0};
+});
+
+var currentView='thisWeek';
+var today=new Date();
+today.setHours(0,0,0,0);
+
+// Set header date
+document.getElementById('today-display').textContent=WEEKDAYS[today.getDay()]+', '+MONTHS[today.getMonth()]+' '+today.getDate()+', '+today.getFullYear();
+
+function getDateRange(){
+  var sow=new Date(today);sow.setDate(today.getDate()-today.getDay()+1);sow.setHours(0,0,0,0);
+  switch(currentView){
+    case'today':var te=new Date(today);te.setHours(23,59,59,999);return{s:new Date(today),e:te};
+    case'thisWeek':var eow=new Date(sow);eow.setDate(sow.getDate()+4);eow.setHours(23,59,59,999);return{s:sow,e:eow};
+    case'nextWeek':var nm=new Date(sow);nm.setDate(sow.getDate()+7);var nf=new Date(nm);nf.setDate(nm.getDate()+4);nf.setHours(23,59,59,999);return{s:nm,e:nf};
+    case'allUpcoming':return{s:new Date(today),e:new Date(2099,11,31)};
+  }
+}
+
+function filterTasks(){
+  var range=getDateRange();
+  var search=document.getElementById('search-input').value.toLowerCase();
+  var jobVal=document.getElementById('job-filter').value;
+  var vendorVal=document.getElementById('vendor-filter').value;
+  return allTasks.filter(function(t){
+    var td=t.startDate||t.dueDate;if(!td)return false;
+    if(td<range.s||td>range.e)return false;
+    if(search&&t.taskName.toLowerCase().indexOf(search)===-1&&t.jobName.toLowerCase().indexOf(search)===-1&&t.vendor.toLowerCase().indexOf(search)===-1)return false;
+    if(jobVal!==''&&t.jobIndex!==parseInt(jobVal))return false;
+    if(vendorVal!==''&&t.vendor!==vendorVal)return false;
+    return true;
+  });
+}
+
+function compClass(c){if(c>=90)return'comp-high';if(c>=50)return'comp-mid';if(c>0)return'comp-low';return'comp-zero';}
+function jobStyle(ji){var c=JOB_COLORS[ji%JOB_COLORS.length];return'background:'+c.bg+';color:'+c.text+';border-color:'+c.border+';';}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function render(){
+  var tasks=filterTasks();
+  var jobSet={},overdue=0;
+  tasks.forEach(function(t){jobSet[t.jobIndex]=true;if(t.dueDate&&t.dueDate<today&&t.completion<100)overdue++;});
+  document.getElementById('stat-tasks').textContent=tasks.length;
+  document.getElementById('stat-jobs').textContent=Object.keys(jobSet).length;
+  document.getElementById('stat-overdue').textContent=overdue;
+  document.getElementById('stat-total').textContent=allTasks.length;
+
+  var groups={};
+  tasks.forEach(function(t){var key=(t.startDate||t.dueDate).toISOString().split('T')[0];if(!groups[key])groups[key]=[];groups[key].push(t);});
+  var sortedKeys=Object.keys(groups).sort();
+
+  var html='';
+  if(sortedKeys.length===0){
+    html='<div class="empty-state">No tasks found for the selected filters.</div>';
+  }else{
+    sortedKeys.forEach(function(key){
+      var d=new Date(key+'T12:00:00');var isToday=d.toDateString()===today.toDateString();var dayTasks=groups[key];
+      html+='<div class="day-group"><div class="day-header">';
+      html+='<h2>'+WEEKDAYS[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()+'</h2>';
+      html+='<span class="day-count">'+dayTasks.length+' task'+(dayTasks.length!==1?'s':'')+'</span>';
+      if(isToday)html+='<span class="today-badge">TODAY</span>';
+      html+='</div>';
+
+      dayTasks.forEach(function(t){
+        var isOD=t.dueDate&&t.dueDate<today&&t.completion<100;
+        html+='<div class="task-card clickable'+(isOD?' overdue':'')+'" data-task-id="'+t.id+'">';
+        html+='<div class="task-row">';
+        html+='<div class="task-info"><div class="task-name">'+esc(t.taskName)+'</div>';
+        html+='<div class="task-tags"><span class="job-tag" style="'+jobStyle(t.jobIndex)+'">'+esc(t.jobName)+'</span>';
+        html+='<span class="vendor-tag">'+esc(t.vendor)+'</span></div></div>';
+        html+='<span class="completion '+compClass(t.completion)+'">'+t.completion+'%</span>';
+        html+='<div class="task-dates">';
+        if(t.startDate)html+='<div class="date-block"><div class="date-label">START</div><div class="date-value">'+fmtDate(t.startDate)+'</div></div>';
+        if(t.dueDate)html+='<div class="date-block"><div class="date-label">DUE</div><div class="date-value'+(isOD?' overdue-text':'')+'">'+fmtDate(t.dueDate)+'</div></div>';
+        html+='</div>';
+        if(isOD)html+='<span class="overdue-flag">OVERDUE</span>';
+        html+='</div></div>';
+      });
+      html+='</div>';
+    });
+  }
+  document.getElementById('task-list').innerHTML=html;
+  attachTaskCardListeners();
+}
+
+// Init dropdowns
+var jobSel=document.getElementById('job-filter');
+JOBS.forEach(function(j,i){var o=document.createElement('option');o.value=i;o.textContent=j;jobSel.appendChild(o);});
+var vendorSet={};allTasks.forEach(function(t){vendorSet[t.vendor]=true;});
+var vendorSel=document.getElementById('vendor-filter');
+Object.keys(vendorSet).sort().forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;vendorSel.appendChild(o);});
+
+// Legend
+var legendEl=document.getElementById('job-legend');
+JOBS.forEach(function(j,i){
+  var btn=document.createElement('button');btn.className='legend-btn';
+  btn.style.cssText=jobStyle(i);btn.textContent=j;
+  btn.onclick=function(){jobSel.value=jobSel.value===String(i)?'':String(i);render();};
+  legendEl.appendChild(btn);
+});
+
+// View buttons
+document.querySelectorAll('#view-btns .view-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    currentView=btn.getAttribute('data-view');
+    document.querySelectorAll('#view-btns .view-btn').forEach(function(b){
+      b.className='view-btn'+(b.getAttribute('data-view')===currentView?' active':'');
+    });
+    render();
+  });
+});
+
+document.getElementById('search-input').addEventListener('input',render);
+document.getElementById('job-filter').addEventListener('change',render);
+document.getElementById('vendor-filter').addEventListener('change',render);
+
+// ======================
+// Setup Banner & Edit Panel
+// ======================
+
+var scriptUrlInput = document.getElementById('script-url-input');
+var statusDot = document.getElementById('status-dot');
+var statusText = document.getElementById('status-text');
+var editPanel = document.getElementById('edit-panel');
+var completionSlider = document.getElementById('completion-slider');
+var completionDisplay = document.getElementById('completion-display');
+var notesTextarea = document.getElementById('notes-textarea');
+var btnSave = document.getElementById('btn-save');
+var btnCancel = document.getElementById('btn-cancel');
+var saveStatus = document.getElementById('save-status');
+var editPanelTitle = document.getElementById('edit-panel-title');
+
+var currentEditTask = null;
+
+// Load script URL from localStorage
+function loadScriptUrl() {
+  var url = localStorage.getItem('launchScriptUrl');
+  if (url) {
+    scriptUrlInput.value = url;
+    updateConnectionStatus();
+  }
+}
+
+// Save script URL to localStorage
+scriptUrlInput.addEventListener('change', function() {
+  localStorage.setItem('launchScriptUrl', this.value);
+  updateConnectionStatus();
+});
+
+function updateConnectionStatus() {
+  var url = scriptUrlInput.value.trim();
+  if (!url) {
+    statusDot.className = 'status-dot';
+    statusText.textContent = 'Not configured';
+    return;
+  }
+  statusDot.className = 'status-dot connected';
+  statusText.textContent = 'Ready';
+}
+
+// Attach listeners to task cards
+function attachTaskCardListeners() {
+  document.querySelectorAll('.task-card.clickable').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var taskId = parseInt(this.getAttribute('data-task-id'));
+      openEditPanel(taskId);
+    });
+  });
+}
+
+// Open edit panel for a task
+function openEditPanel(taskId) {
+  currentEditTask = allTasks[taskId];
+  if (!currentEditTask) return;
+
+  editPanelTitle.textContent = 'Edit: ' + esc(currentEditTask.taskName);
+  completionSlider.value = currentEditTask.completion;
+  completionDisplay.textContent = currentEditTask.completion + '%';
+  notesTextarea.value = '';
+  saveStatus.innerHTML = '';
+
+  editPanel.classList.add('open');
+  editPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Close edit panel
+function closeEditPanel() {
+  editPanel.classList.remove('open');
+  currentEditTask = null;
+  saveStatus.innerHTML = '';
+}
+
+// Update completion display
+completionSlider.addEventListener('input', function() {
+  completionDisplay.textContent = this.value + '%';
+});
+
+// Cancel button
+btnCancel.addEventListener('click', closeEditPanel);
+
+// Save to sheet
+btnSave.addEventListener('click', function() {
+  if (!currentEditTask) return;
+
+  var scriptUrl = scriptUrlInput.value.trim();
+  if (!scriptUrl) {
+    saveStatus.innerHTML = '<span style="color: var(--red);">Apps Script URL not configured</span>';
+    return;
+  }
+
+  var completion = parseInt(completionSlider.value);
+  var notes = notesTextarea.value;
+  var sheetName = SHEET_MAP[currentEditTask.jobIndex];
+
+  if (!sheetName) {
+    saveStatus.innerHTML = '<span style="color: var(--red);">Invalid job mapping</span>';
+    return;
+  }
+
+  btnSave.disabled = true;
+  saveStatus.className = 'save-status saving';
+  saveStatus.innerHTML = '<span class="spinner"></span> Saving...';
+
+  var payload = {
+    sheetName: sheetName,
+    taskName: currentEditTask.taskName,
+    completion: completion,
+    notes: notes
+  };
+
+  fetch(scriptUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(result) {
+    if (result.success) {
+      // Update local task data
+      currentEditTask.completion = completion;
+
+      saveStatus.className = 'save-status success';
+      saveStatus.innerHTML = '✓ Saved successfully';
+
+      // Re-render to update UI
+      setTimeout(function() {
+        render();
+        closeEditPanel();
+      }, 1000);
+    } else {
+      saveStatus.className = 'save-status error';
+      saveStatus.textContent = 'Error: ' + result.message;
+      btnSave.disabled = false;
+    }
+  })
+  .catch(function(error) {
+    saveStatus.className = 'save-status error';
+    saveStatus.textContent = 'Network error: ' + error.message;
+    btnSave.disabled = false;
+  });
+});
+
+loadScriptUrl();
+render();
+</script>
+</body>
+</html>
